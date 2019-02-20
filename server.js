@@ -7,8 +7,8 @@ let cheerio = require('cheerio');
 let app = express();
 
 // Database configuration
-let databaseUrl = 'scraper';
-let collections = ['scrapedData'];
+let databaseUrl = process.env.MONGODB_URI || 'scraper';
+let collections = ['dota'];
 
 let db = mongojs(databaseUrl, collections);
 db.on('error', function(error) {
@@ -24,7 +24,7 @@ app.get('/', function(req, res) {
 let results = [];
 
 app.get('/all', (req, res) => {
-  db.scraper.find({}, (error, found) => {
+  db.dota.find({}, (error, found) => {
     //callback things
     if (error) {
       console.log('Danger will Robinson');
@@ -62,7 +62,7 @@ app.get('/dota', (req, res) => {
       });
 
       console.log("I'm Blog: ", results);
-      db.scraper.insert(results, (err, results) => {
+      db.dota.insert(results, (err, results) => {
         if (err) {
           console.log(err);
         } else {
