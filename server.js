@@ -6,6 +6,7 @@ const cheerio = require('cheerio');
 const path = require('path');
 
 const app = express();
+const PORT = process.env.MONGODB_URI || 3000;
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -122,6 +123,6 @@ app.get('/dota', (req, res) => {
   // res.json(results);
 });
 
-app.listen(3000, function() {
+app.listen(PORT, function() {
   console.log('App running on port 3000!');
 });
