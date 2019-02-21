@@ -1,16 +1,21 @@
 // Dependencies
-let express = require('express');
-let mongojs = require('mongojs');
-let axios = require('axios');
-let cheerio = require('cheerio');
+const express = require('express');
+const mongojs = require('mongojs');
+const axios = require('axios');
+const cheerio = require('cheerio');
+const path = require('path');
 
-let app = express();
+const app = express();
+
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Database configuration
-let databaseUrl = process.env.MONGODB_URI || 'scraper';
-let collections = ['dota'];
+const databaseUrl = process.env.MONGODB_URI || 'scraper';
+const collections = ['dota'];
 
-let db = mongojs(databaseUrl, collections);
+const db = mongojs(databaseUrl, collections);
 
 db.on('error', function(error) {
   console.log('Database Error:', error);
@@ -22,7 +27,7 @@ db.on('connect', () => {
 
 // Routes
 app.get('/', function(req, res) {
-  res.send('Hello world');
+  res.sendFile(path.join(__dirname, '/index.html'));
 });
 
 // For to hold le'results
@@ -40,66 +45,74 @@ app.get('/all', (req, res) => {
 });
 
 app.get('/dota', (req, res) => {
-  axios.get('http://blog.dota2.com/').then(res => {
-    let $ = cheerio.load(res.data);
+  axios
+    .get('http://blog.dota2.com/')
+    .then(res => {
+      let $ = cheerio.load(res.data);
 
-    $('.type-post').each((i, element) => {
-      let title = $(element)
-        .find('h2')
-        .find('a')
-        .text();
+      $('.type-post').each((i, element) => {
+        let title = $(element)
+          .find('h2')
+          .find('a')
+          .text();
 
-      let date = $(element)
-        .find('div .entry-meta')
-        .text()
-        .trim();
+        let date = $(element)
+          .find('div .entry-meta')
+          .text()
+          .trim();
 
-      let link = $(element)
-        .find('h2')
-        .find('a')
-        .attr('href');
+        let link = $(element)
+          .find('h2')
+          .find('a')
+          .attr('href');
 
-      let img = $(element)
-        .find('div .entry-content')
-        .find('p')
-        .find('img')
-        .attr('src');
+        let img = $(element)
+          .find('div .entry-content')
+          .find('p')
+          .find('img')
+          .attr('src');
 
-      let summary = $(element)
-        .find('div')
-        .children()
-        .eq(1)
-        .text();
+        let summary = $(element)
+          .find('div')
+          .children()
+          .eq(1)
+          .text();
 
-      let blog = {
-        title: title,
-        date: date,
-        link: link,
-        img: img,
-        summary: summary
-      };
+        let blog = {
+          title: title,
+          date: date,
+          link: link,
+          img: img,
+          summary: summary
+        };
 
-      // blog.summary = blog.summary + ' (click to read more)';
+        // blog.summary = blog.summary + ' (click to read more)';
 
-      results.push(blog);
+        results.push(blog);
 
-      console.log("I'm results: ", results);
+        console.log("I'm results: ", results);
 
-      //   db.dota.insert(results, (err, results) => {
-      //     if (err) {
-      //       console.log(err);
-      //     } else {
-      //       console.log(results);
-      //     }
-      //   });
-      // })
-      // .then(() => {
-      //   console.log('Scrape Complete');
-      //   res.json(results);
-      // })
-      // .catch(err => console.log(err));
-    });
-  });
+        //   db.dota.insert(results, (err, results) => {
+        //     if (err) {
+        //       console.log(err);
+        //     } else {
+        //       console.log(results);
+        //     }
+        //   });
+        // })
+        // .then(() => {
+        //   console.log('Scrape Complete');
+        //   res.json(results);
+        // })
+        // .catch(err => console.log(err));
+      });
+    })
+    .then(gathered => {
+      console.log('Gathered: ', gathered);
+      res.json(results);
+    })
+    .catch(err => console.log(err));
+  // res.json(results);
 });
 
 app.listen(3000, function() {
