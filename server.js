@@ -123,5 +123,5 @@ app.get('/dota', (req, res) => {
   // res.json(results);
 });
 app.listen(PORT, function() {
-  console.log('App running on port 3000!');
+  console.log('App running on port: ' + PORT + '!');
 });
