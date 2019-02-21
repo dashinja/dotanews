@@ -12,7 +12,14 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Database configuration
-const databaseUrl = process.env.MONGODB_URI || 'scraper';
+let databaseUrl;
+
+if (process.env.MONGODB_URI) {
+  databaseUrl = process.env.MONGODB_URI;
+} else {
+  databaseUrl = 'scraper';
+}
+
 const collections = ['dota'];
 
 const db = mongojs(databaseUrl, collections);
