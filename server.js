@@ -120,8 +120,23 @@ app.get('/dota', (req, res) => {
       res.json(results);
     })
     .catch(err => console.log(err));
-  // res.json(results);
 });
+
+// Post route for comments
+app.post('/comments', (req, res) => {
+  console.log('hi there');
+  console.log("I'm a req: ", req.body);
+
+  let databaseEntry = {
+    username: username,
+    usercomment: usercomment
+  };
+
+  db.dotaComments.insert({ databaseEntry });
+
+  res.send('Hi there');
+});
+
 app.listen(PORT, function() {
   console.log('App running on port: ' + PORT + '!');
 });
