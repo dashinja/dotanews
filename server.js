@@ -24,7 +24,7 @@ if (process.env.MONGODB_URI) {
 const collections = ['dota'];
 
 const db = mongojs(databaseUrl, collections);
-
+console.log('This time, databaseURL is: ', databaseUrl);
 db.on('error', function(error) {
   console.log('Database Error:', error);
 });
@@ -122,7 +122,6 @@ app.get('/dota', (req, res) => {
     .catch(err => console.log(err));
   // res.json(results);
 });
-
 app.listen(PORT, function() {
   console.log('App running on port 3000!');
 });
