@@ -11,8 +11,13 @@ let databaseUrl = process.env.MONGODB_URI || 'scraper';
 let collections = ['dota'];
 
 let db = mongojs(databaseUrl, collections);
+
 db.on('error', function(error) {
   console.log('Database Error:', error);
+});
+
+db.on('connect', () => {
+  console.log('database connected - with collection: ', collections);
 });
 
 // Routes
@@ -25,7 +30,6 @@ let results = [];
 
 app.get('/all', (req, res) => {
   db.dota.find({}, (error, found) => {
-    //callback things
     if (error) {
       console.log('Danger will Robinson');
     } else {
@@ -36,45 +40,66 @@ app.get('/all', (req, res) => {
 });
 
 app.get('/dota', (req, res) => {
-  axios
-    .get('http://blog.dota2.com/')
-    .then(res => {
-      let $ = cheerio.load(res.data);
+  axios.get('http://blog.dota2.com/').then(res => {
+    let $ = cheerio.load(res.data);
 
-      $('.type-post').each((i, element) => {
-        let title = $(element)
-          .find('h2')
-          .find('a')
-          .text();
-        console.log(title);
+    $('.type-post').each((i, element) => {
+      let title = $(element)
+        .find('h2')
+        .find('a')
+        .text();
 
-        let link = $(element)
-          .find('h2')
-          .find('a')
-          .attr('href');
-        console.log(link);
+      let date = $(element)
+        .find('div .entry-meta')
+        .text()
+        .trim();
 
-        let blog = {
-          title: title,
-          link: link
-        };
-        results.push(blog);
-      });
+      let link = $(element)
+        .find('h2')
+        .find('a')
+        .attr('href');
 
-      console.log("I'm Blog: ", results);
-      db.dota.insert(results, (err, results) => {
-        if (err) {
-          console.log(err);
-        } else {
-          console.log(results);
-        }
-      });
-    })
-    .then(() => {
-      console.log('Scrape Complete');
-    })
-    .catch(err => console.log(err));
-  res.json(results);
+      let img = $(element)
+        .find('div .entry-content')
+        .find('p')
+        .find('img')
+        .attr('src');
+
+      let summary = $(element)
+        .find('div')
+        .children()
+        .eq(1)
+        .text();
+
+      let blog = {
+        title: title,
+        date: date,
+        link: link,
+        img: img,
+        summary: summary
+      };
+
+      // blog.summary = blog.summary + ' (click to read more)';
+
+      results.push(blog);
+
+      console.log("I'm results: ", results);
+
+      //   db.dota.insert(results, (err, results) => {
+      //     if (err) {
+      //       console.log(err);
+      //     } else {
+      //       console.log(results);
+      //     }
+      //   });
+      // })
+      // .then(() => {
+      //   console.log('Scrape Complete');
+      //   res.json(results);
+      // })
+      // .catch(err => console.log(err));
+    });
+  });
 });
 
 app.listen(3000, function() {
