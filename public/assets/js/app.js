@@ -24,7 +24,7 @@ $(() => {
         .text('Click here for more');
 
       // let articleButton = $("<button>").attr()
-      let articleButton = `<form action="/comments" class="form" method="post">
+      let articleButton = `<form action="/comments" class="form comment" method="post">
       <input type="text" class="name" name="username" id="user-name" />
       <input type="text" class="comment" name="usercomment" id="user-comment" />
       <button class="submit" id="btn-submit">Comment</button>
@@ -38,7 +38,24 @@ $(() => {
         .append(link)
         .append(articleButton);
 
+      
+
       $('#root').append(div);
+    });
+  });
+
+  $('#btn-submit').on('click', e => {
+    e.preventDefault();
+    let username = $('.name').val();
+    let usercomment = $('.comment').val();
+
+    let objPass = {
+      username: username,
+      usercomment: usercomment
+    };
+
+    $.post('/comments', objPass, (data) => {
+
     });
   });
 });

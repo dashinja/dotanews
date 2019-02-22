@@ -128,13 +128,23 @@ app.post('/comments', (req, res) => {
   console.log("I'm a req: ", req.body);
 
   let databaseEntry = {
-    username: username,
-    usercomment: usercomment
+    username: req.body.username,
+    usercomment: req.body.usercomment
   };
 
-  db.dotaComments.insert({ databaseEntry });
+  db.dotaComments.insert({ databaseEntry }, (err, newDoc) => {
+    if (err) {
+      res.send('Error inserting new comment');
+    } else {
+      res.json(newDoc);
+    }
+  });
+});
 
-  res.send('Hi there');
+app.get('/comments', (req, res) => {
+  db.dotaComments.find({}, (err, comments) => {
+    res.json(comments);
+  });
 });
 
 app.listen(PORT, function() {
