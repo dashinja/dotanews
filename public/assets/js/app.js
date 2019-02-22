@@ -42,7 +42,12 @@ $(() => {
 
       $('#root').append(div);
     });
-  });
+  })
+  .then(() => {
+    $.get("/comments", data, function() {
+      
+    })
+  })
 
   $('#btn-submit').on('click', e => {
     e.preventDefault();
